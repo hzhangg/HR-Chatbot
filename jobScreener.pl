@@ -2,7 +2,8 @@
 :- dynamic prop/3.
 
 ask() :-
-    write("\n Welcome to the HR Bot"), 
+    flush_output(current_output),
+    write('\n Welcome to the HR Bot'), 
 	write('\n I am a personal assistant bot. \n'),
 	write('\n Select an option: \n
         1. Look for a Job Posting \n
@@ -10,7 +11,7 @@ ask() :-
         3. Update your Resume \n
         4. Show your Resume \n 
         5. Measure your Resume \n'),
-    read(Input),
+    readTerminal(Input),
     query(Input).
 
 % ask() -> query() -> filterFunction() -> ask()
@@ -21,54 +22,63 @@ ask() :-
 
 % Filter jobs to find one suited for a user based on their input 
 query(Input) :-
-  Input = 1,
+  Input = '1',
   write('\n What location are you looking for? \n'),
-  read(Location),
+  readTerminal(Location),
   write('\n What industry are you looking to work in? \n'),
-  read(Industry),
+  readTerminal(Industry),
   write('\n When can you apply by? In the form MM/DD/YY \n'),
-  read(Deadline),
+  readTerminal(Deadline),
   write('\n What job position are you looking for? \n'),
-  read(Position),
+  readTerminal(Position),
   write('\n What salary do you desire? (dollars per hour) \n'),
-  read(Salary),
+  readTerminal(Salary),
   write('\n Are you looking for full time work? Enter \'1\' if so, \'0\' if not \n'),
-  read(IsFullTime),
+  readTerminal(IsFullTime),
   write('\n Are you looking for remote work? Enter \'1\' if so, \'0\' if not \n'),
-  read(IsRemote),
+  readTerminal(IsRemote),
   jobFilter(Location, Industry, Deadline, Position, Salary, IsFullTime, IsRemote).
 
 % Create a users resume
 query(Input) :-
-  Input = 2, 
+  Input = '2', 
   write('\n What is your name? \n'),
-  read(Username),
+  readTerminal(Username),
   checkUserQ2(Username).
 
 % Update a users resume
 query(Input) :-
-  Input = 3,
+  Input = '3',
   write('\n What is your name? \n'),
-  read(Username),
+  readTerminal(Username),
   checkUserQ3(Username).
 
 % Prints a users resume
 query(Input) :- 
-  Input = 4,
+  Input = '4',
   write('\n What is your name? \n'),
-  read(Username),
+  readTerminal(Username),
+  print(Username),
   checkUserQ4(Username).
 
 % Measures a users resume
 query(Input) :- 
-  Input = 5,
+  Input = '5',
   write('\n What is your name? \n'),
-  read(Username),
+  readTerminal(Username),
   checkUserQ5(Username).
 
 query(_) :-
     write('\n Invalid Input \n'),
     ask().
+
+% ===========
+% Parses user input
+% =========
+readTerminal(Out) :-
+  flush_output(current_output),
+  readln(Ln),
+  atomic_list_concat(Ln, ' ', Out).
 
 % ===========
 % Iterate over list of jobs
@@ -118,13 +128,13 @@ checkWithin([H|T], List, Score) :-
     checkWithin(T, List, Score).
 
 % We use for Education 
-% ["HighSchool", "Undergraduate", "Masters"]
-measureEducation(UserEdu, "Masters", 1) :-
-    member(UserEdu, ["Masters"]).
-measureEducation(UserEdu, "Undergraduate", 1) :- 
-    member(UserEdu, ["Undergraduate", "Masters"]).
-measureEducation(UserEdu, "HighSchool", 1) :- 
-    member(UserEdu, ["HighSchool","Undergraduate", "Masters"]).
+% ['HighSchool', 'Undergraduate', 'Masters']
+measureEducation(UserEdu, 'Masters', 1) :-
+    member(UserEdu, ['Masters']).
+measureEducation(UserEdu, 'Undergraduate', 1) :- 
+    member(UserEdu, ['Undergraduate', 'Masters']).
+measureEducation(UserEdu, 'HighSchool', 1) :- 
+    member(UserEdu, ['HighSchool','Undergraduate', 'Masters']).
 measureEducation(_,_ , 0).
 
 
@@ -136,14 +146,18 @@ measureExperience([], _, 0).
 % case where programming language is a job requirement and user does have enough experience
 measureExperience([(P, E)|T], List, Score) :- 
     member((P, X), List), 
-    X =< E, 
+    atom_number(X, XN),
+    atom_number(E, EN),
+    XN =< EN, 
     measureExperience(T, List, ScoreNew), 
     Score is ScoreNew + 1. 
     
 % case where programming language is a job requirement and user does NOT have enough experience
 measureExperience([(P, E)|T], List, Score) :-
     member((P, X), List),
-    E < X,
+    atom_number(X, XN),
+    atom_number(E, EN),
+    EN < XN,
     measureExperience(T, List, Score).
 
 % case where programming language is not a job requirement 
@@ -258,15 +272,15 @@ checkUserQ2(Username) :-
 
 creation(Username) :-
   write('\n What language do you speak? \n'),
-  read(Language),
+  readTerminal(Language),
   write('\n What is a computer program you are most familiar with? \n'),
-  read(Program),
+  readTerminal(Program),
   write('\n What is your highest level of education? \n'),
-  read(Education),
+  readTerminal(Education),
   write('\n What programming language do you know best? \n'),
-  read(PLanguage),
+  readTerminal(PLanguage),
   write('\n How many years of experience do you have coding with it? \n'),
-  read(Years),
+  readTerminal(Years),
   assertz(prop(Username, type, applicant)),
   assertz(prop(Username, language, Language)),
   assertz(prop(Username, programs, Program)),
@@ -296,34 +310,34 @@ update(Username) :-
         1. A spoken language \n 
         2. A computer program you are familar with \n
         3. A programming language you know \n'),
-  read(Choice),
+  readTerminal(Choice),
   updatePrompt(Username, Choice). 
 
 % Helper to update a resume, adds a spoken language
 updatePrompt(Username, Choice) :-
-   Choice = 1, 
+   Choice = '1', 
    write('\n What language would you like to add? \n'), 
-   read(Language),
+   readTerminal(Language),
    assertz(prop(Username, language, Language)),
    write('\n Updated! \n'),
    ask().
 
 % Helper to update a resume, adds a computer program
 updatePrompt(Username, Choice) :-
-   Choice = 2, 
+   Choice = '2', 
    write('\n What program would you like to add? \n'), 
-   read(Program),
+   readTerminal(Program),
    assertz(prop(Username, programs, Program)),
    write('\n Updated! \n'),
    ask().
 
 % Helper to update a resume, adds a programming language
 updatePrompt(Username, Choice) :-
-   Choice = 3, 
+   Choice = '3', 
    write('\n What programming language would you like to add? \n'), 
-   read(PLanguage),
+   readTerminal(PLanguage),
    write('\n How many years of experience do you have coding with it? \n'),
-   read(Years),
+   readTerminal(Years),
    findall(V, prop(Username, experience, (PLanguage, V)), Vals),
    removeExperiences(Username, PLanguage, Vals),
    assertz(prop(Username, experience, (PLanguage, Years))),
@@ -469,7 +483,18 @@ findSetExperience(ID, Set) :-
 % Printer Functions
 % ========================
 
+% Generic for printing lists
+% Base case, empty list
 printList([]).
+% Case where elements are in pairs (e.g. programming language and years of experience)
+printList([(X, Y)|T]) :-
+    write('     - '),
+    write(X),
+    write(', '),
+    write(Y),
+    write('\n'),
+    printList(T).
+% Case where elements are not in pairs
 printList([H|T]) :-
     write('     - '),
     write(H),
@@ -561,114 +586,125 @@ printExperience([(PL,YOE)|T]) :-
 % ========================
 % prop(person, property, value)
 % type       is applicant
-prop("Bob", type, applicant).
-prop("Bob", language, "English").
-prop("Bob", programs, "Microsoft Excel").
-prop("Bob", programs, "AWS").
-prop("Bob", programs, "MATLAB").
-prop("Bob", education, "Undergraduate").
-prop("Bob", experience, ("C", 4)).
-prop("Bob", experience, ("Python", 4)).
+prop('Bob', type, applicant).
+prop('Bob', language, 'English').
+prop('Bob', programs, 'Microsoft Excel').
+prop('Bob', programs, 'AWS').
+prop('Bob', programs, 'MATLAB').
+prop('Bob', education, 'Undergraduate').
+prop('Bob', experience, ('C', '4')).
+prop('Bob', experience, ('Python', '4')).
 
 
 % prop(person, property, value)
-prop("Alice", type, applicant).
-prop("Alice", language, "Chinese").
-prop("Alice", programs, "Microsoft Office").
-prop("Alice", education, "High School").
-prop("Alice", experience, ("Python", 2)).
+prop('Alice', type, applicant).
+prop('Alice', language, 'Chinese').
+prop('Alice', programs, 'Microsoft Office').
+prop('Alice', education, 'High School').
+prop('Alice', experience, ('Python', '2')).
+
+prop('David Poole', type, applicant).
+prop('David Poole', language, 'English').
+prop('David Poole', programs, 'Microsoft Excel').
+prop('David Poole', programs, 'AWS').
+prop('David Poole', programs, 'MATLAB').
+prop('David Poole', education, 'Masters').
+prop('David Poole', experience, ('Haskell', '100')).
+prop('David Poole', experience, ('Prolog', '100')).
+prop('David Poole', experience, ('C', '4')).
+prop('David Poole', experience, ('Python', '4')).
 
 % ========================
 % Job Encoding
 % ========================
 % prop(jobId, property, value)
-% JobId is "XXX" 
+% JobId is 'XXX' 
 
 % Filter Properties
 % A posting has only one of each property
 % type       is job
-% location   is "Location"
-% industry   is "Industry"
-% deadline   is "MM/DD/YY"
-% position   is "Position"
-% salary     is "Int", Represents $ per hour
+% location   is 'Location'
+% industry   is 'Industry'
+% deadline   is 'MM/DD/YY'
+% position   is 'Position'
+% salary     is 'Int', Represents $ per hour
 % isFulltime is one of [1,0]
 % isRemote   is one of [1,0]
 
 prop(001, type, job).
-prop(001, location, "Vancouver").
-prop(001, industry, "Computer Science").
-prop(001, deadline, "01/31/2022").
-prop(001, position, "Software Engineer").
+prop(001, location, 'Vancouver').
+prop(001, industry, 'Computer Science').
+prop(001, deadline, '01/31/2022').
+prop(001, position, 'Software Engineer').
 prop(001, salary, 40).
 prop(001, isFulltime, 1).
 prop(001, isRemote, 1).
 
 prop(002, type, job).
-prop(002, location, "Toronto").
-prop(002, industry, "Banking").
-prop(002, deadline, "01/31/2022").
-prop(002, position, "Junior Quantitative Researcher").
+prop(002, location, 'Toronto').
+prop(002, industry, 'Banking').
+prop(002, deadline, '01/31/2022').
+prop(002, position, 'Junior Quantitative Researcher').
 prop(002, salary, 100).
 prop(002, isFulltime, 1).
 prop(002, isRemote, 1).
 
 prop(003, type, job).
-prop(003, location, "Paris").
-prop(003, industry, "Marketing").
-prop(003, deadline, "01/31/2022").
-prop(003, position, "SEO Engineer").
+prop(003, location, 'Paris').
+prop(003, industry, 'Marketing').
+prop(003, deadline, '01/31/2022').
+prop(003, position, 'SEO Engineer').
 prop(003, salary, 40).
 prop(003, isFulltime, 0).
 prop(003, isRemote, 1).
 
 prop(004, type, job).
-prop(004, location, "Toronto").
-prop(004, industry, "Customer Service").
-prop(004, deadline, "01/31/2022").
-prop(004, position, "Junior Network Engineer").
+prop(004, location, 'Toronto').
+prop(004, industry, 'Customer Service').
+prop(004, deadline, '01/31/2022').
+prop(004, position, 'Junior Network Engineer').
 prop(004, salary, 20).
 prop(004, isFulltime, 1).
 prop(004, isRemote, 1).
 
 prop(005, type, job).
-prop(005, location, "Vancouver").
-prop(005, industry, "Health Care").
-prop(005, deadline, "01/31/2022").
-prop(005, position, "Senior Biomedical Engineer").
+prop(005, location, 'Vancouver').
+prop(005, industry, 'Health Care').
+prop(005, deadline, '01/31/2022').
+prop(005, position, 'Senior Biomedical Engineer').
 prop(005, salary, 40).
 prop(005, isFulltime, 1).
 prop(005, isRemote, 1).
 
 % Scoring Properties
 % Aside from education, a posting may have multiple of the property
-% language   is "Language"
-% programs   is "NameOfProgram"
-% education  is one of ["HighSchool", "Undergraduate", "Masters"]
-% experience is ("Programming Language", YearsOfExperience)
+% language   is 'Language'
+% programs   is 'NameOfProgram'
+% education  is one of ['HighSchool', 'Undergraduate', 'Masters']
+% experience is ('Programming Language', YearsOfExperience)
 
-prop(001, language, "English").
-prop(001, programs, "Microsoft Excel").
-prop(001, education, "Undergraduate").
-prop(001, experience, ("C", 4)).
-prop(001, experience, ("Python", 5)).
+prop(001, language, 'English').
+prop(001, programs, 'Microsoft Excel').
+prop(001, education, 'Undergraduate').
+prop(001, experience, ('C', '4')).
+prop(001, experience, ('Python', '5')).
 
-prop(002, language, "English").
-prop(002, programs, "MATLAB").
-prop(002, education, "Masters").
-prop(002, experience, ("Python", 4)).
+prop(002, language, 'English').
+prop(002, programs, 'MATLAB').
+prop(002, education, 'Masters').
+prop(002, experience, ('Python', '4')).
 
-prop(003, language, "French").
-prop(003, programs, "Microsoft Excel").
-prop(003, education, "Undergraduate").
-prop(003, experience, ("Python", 2)).
+prop(003, language, 'French').
+prop(003, programs, 'Microsoft Excel').
+prop(003, education, 'Undergraduate').
+prop(003, experience, ('Python', '2')).
 
-prop(004, language, "English").
-prop(004, programs, "AWS").
-prop(004, education, "Undergraduate").
-prop(004, experience, ("Perl", 1)).
+prop(004, language, 'English').
+prop(004, programs, 'AWS').
+prop(004, education, 'Undergraduate').
+prop(004, experience, ('Perl', '1')).
 
-prop(005, language, "English").
-prop(005, programs, "Microsoft Excel").
-prop(005, education, "Masters").
-prop(005, experience, ("Python", 5)).
+prop(005, language, 'English').
+prop(005, programs, 'Microsoft Excel').
+prop(005, education, 'Masters').
+prop(005, experience, ('Python', '5')).
