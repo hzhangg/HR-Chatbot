@@ -27,17 +27,18 @@ query(Input) :-
   readTerminal(Location),
   write('\n What industry are you looking to work in? \n'),
   readTerminal(Industry),
-  write('\n When can you apply by? In the form MM/DD/YY \n'),
-  readTerminal(Deadline),
   write('\n What job position are you looking for? \n'),
   readTerminal(Position),
   write('\n What salary do you desire? (dollars per hour) \n'),
-  readTerminal(Salary),
+  readTerminal(S),
+  atom_number(S, Salary),
   write('\n Are you looking for full time work? Enter \'1\' if so, \'0\' if not \n'),
-  readTerminal(IsFullTime),
+  readTerminal(I1),
+  atom_number(I1, IsFullTime),
   write('\n Are you looking for remote work? Enter \'1\' if so, \'0\' if not \n'),
-  readTerminal(IsRemote),
-  jobFilter(Location, Industry, Deadline, Position, Salary, IsFullTime, IsRemote).
+  readTerminal(I2),
+  atom_number(I2, IsRemote),
+  jobFilter(Location, Industry, Position, Salary, IsFullTime, IsRemote).
 
 % Create a users resume
 query(Input) :-
@@ -68,7 +69,8 @@ query(Input) :-
   readTerminal(Username),
   checkUserQ5(Username).
 
-query(_) :-
+query(Input) :-
+    not(member(Input, ['1', '2', '3', '4', '5'])),
     write('\n Invalid Input \n'),
     ask().
 
@@ -79,6 +81,7 @@ readTerminal(Out) :-
   flush_output(current_output),
   readln(Ln),
   atomic_list_concat(Ln, ' ', Out).
+
 
 % ===========
 % Iterate over list of jobs
@@ -139,8 +142,6 @@ measureEducation(_,_ , 0).
 
 
 % We use for Experience
-% - 
-% - 
 % base case
 measureExperience([], _, 0).
 % case where programming language is a job requirement and user does have enough experience
@@ -187,12 +188,11 @@ compareYear((P,E), [(D, _)| T], Score) :-
 % ---------------------------
 % Query 1: Job Posting Filter
 % ---------------------------
-jobFilter(Loc, Ind, Dead, Pos, Sal, Full, Rem) :-
+jobFilter(Loc, Ind, Pos, Sal, Full, Rem) :-
     findall(J, prop(J, type, job), List),
     filterOut(location, Loc, List, L),
     filterOut(industry, Ind, L, I),
-    filterOut(deadline, Dead, I, D),
-    filterOut(position, Pos, D, P),
+    filterOut(position, Pos, I, P),
     filterOut(salary, Sal, P, S),
     filterOut(isFulltime, Full, S, F),
     filterOut(isRemote, Rem, F, R),
@@ -205,6 +205,13 @@ jobFilter(Loc, Ind, Dead, Pos, Sal, Full, Rem) :-
 % if x given, then ignore filter
 filterOut(_, x, List, List).
 filterOut(_, _, [], []).
+
+% special case for salary, where the desired salary can be less than the one offered
+filterOut(salary, Val, [H|T], [H|R]) :-
+    prop(H, salary, S),
+    Val =< S, 
+    filterOut(salary, Val, T, R).
+
 filterOut(Prop, Val, [H|T], [H|R]) :-
     prop(H, Prop, Val),
     filterOut(Prop, Val, T, R).
@@ -242,11 +249,12 @@ showJob(JobId):-
     write('\n'),
     printLocation(Loc),
     printIndustry(Ind),
-    printDeadline(Dea),
     printPosition(Pos),
     printSalary(Sal),
     printIsFulltime(Ful),
     printIsRemote(Rem),
+    printDeadline(Dea),
+    write('\n'),
     write('-> Languages   '), write('Qualifications \n'),
     printLanguages(LL),
     write('-> Programs    '), write('Qualifications \n'),
@@ -513,7 +521,7 @@ printIndustry(V) :-
     write('\n'). 
 
 printDeadline(V) :-
-    write('-> Deadline    '),
+    write('-> Application Deadline:    '),
     write(V),
     write('\n'). 
 
@@ -634,7 +642,7 @@ prop('David Poole', experience, ('Python', '4')).
 prop(001, type, job).
 prop(001, location, 'Vancouver').
 prop(001, industry, 'Computer Science').
-prop(001, deadline, '01/31/2022').
+prop(001, deadline, 01/31/2022).
 prop(001, position, 'Software Engineer').
 prop(001, salary, 40).
 prop(001, isFulltime, 1).
@@ -643,7 +651,7 @@ prop(001, isRemote, 1).
 prop(002, type, job).
 prop(002, location, 'Toronto').
 prop(002, industry, 'Banking').
-prop(002, deadline, '01/31/2022').
+prop(002, deadline, 01/31/2022).
 prop(002, position, 'Junior Quantitative Researcher').
 prop(002, salary, 100).
 prop(002, isFulltime, 1).
@@ -652,7 +660,7 @@ prop(002, isRemote, 1).
 prop(003, type, job).
 prop(003, location, 'Paris').
 prop(003, industry, 'Marketing').
-prop(003, deadline, '01/31/2022').
+prop(003, deadline, 01/31/2022).
 prop(003, position, 'SEO Engineer').
 prop(003, salary, 40).
 prop(003, isFulltime, 0).
@@ -661,7 +669,7 @@ prop(003, isRemote, 1).
 prop(004, type, job).
 prop(004, location, 'Toronto').
 prop(004, industry, 'Customer Service').
-prop(004, deadline, '01/31/2022').
+prop(004, deadline, 01/31/2022).
 prop(004, position, 'Junior Network Engineer').
 prop(004, salary, 20).
 prop(004, isFulltime, 1).
@@ -670,7 +678,7 @@ prop(004, isRemote, 1).
 prop(005, type, job).
 prop(005, location, 'Vancouver').
 prop(005, industry, 'Health Care').
-prop(005, deadline, '01/31/2022').
+prop(005, deadline, 01/31/2022).
 prop(005, position, 'Senior Biomedical Engineer').
 prop(005, salary, 40).
 prop(005, isFulltime, 1).
