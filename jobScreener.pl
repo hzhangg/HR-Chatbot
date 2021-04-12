@@ -2,8 +2,8 @@
 :- dynamic prop/3.
 
 ask() :-
-    write("Welcome to the HR Bot"), 
-	write('\n I am a personal assistant bot.'),
+    write("\n Welcome to the HR Bot"), 
+	write('\n I am a personal assistant bot. \n'),
 	write('\n Select an option: \n
         1. Look for a Job Posting \n
         2. Create your Resume \n
@@ -43,6 +43,220 @@ query(Input) :-
   Input = 2, 
   write('\n What is your name? \n'),
   read(Username),
+  checkUserQ2(Username).
+
+% Update a users resume
+query(Input) :-
+  Input = 3,
+  write('\n What is your name? \n'),
+  read(Username),
+  checkUserQ3(Username).
+
+% Prints a users resume
+query(Input) :- 
+  Input = 4,
+  write('\n What is your name? \n'),
+  read(Username),
+  checkUserQ4(Username).
+
+% Measures a users resume
+query(Input) :- 
+  Input = 5,
+  write('\n What is your name? \n'),
+  read(Username),
+  checkUserQ5(Username).
+
+query(_) :-
+    write('\n Invalid Input \n'),
+    ask().
+
+% ===========
+% Iterate over list of jobs
+% =========
+
+measureJobList(_, []).
+measureJobList(Username, [J|T]) :-
+    findQualifications(Username, ULangList, UProgList, UEd, UExpList), % Maybe move out
+    findQualifications(J, JLangList, JProgList, JEd, JExpList),
+    % Start measuring
+    checkWithin(ULangList, JLangList, LangScore),
+    checkWithin(UProgList, JProgList, ProgScore),
+    measureEducation(UEd, JEd, EduScore),
+    measureExperience(UExpList, JExpList, ExpScore),
+    getTotalQualScore(J, TotalQ),
+    TotalScore is LangScore + ProgScore + EduScore + ExpScore, 
+    PercentQ is (TotalScore / TotalQ) * 100,
+    write('\n You are '),
+    write(PercentQ),
+    write('% qualified to work job number '),
+    write(J),
+    write('! \n'),
+    measureJobList(Username, T).
+
+
+% ========================
+% Measuring Functions
+% ========================
+getTotalQualScore(J, Jobtotal) :-
+    findQualifications(J, LangL, ProgL, _, ExpL),
+    length(LangL, LangSum),
+    length(ProgL, ProgSum),
+    length(ExpL, ExpSum),
+    Jobtotal is LangSum + ProgSum + 1 + ExpSum.
+    
+% We can use for
+% - Languages
+% - Programs 
+checkWithin([], _, 0).
+checkWithin([H|T], List, Score) :- 
+    member(H, List), % The comparator
+    checkWithin(T, List, ScoreNew),
+    Score is ScoreNew + 1.
+    
+checkWithin([H|T], List, Score) :-
+    not(member(H, List)), % The comparator
+    checkWithin(T, List, Score).
+
+% We use for Education 
+% ["HighSchool", "Undergraduate", "Masters"]
+measureEducation(UserEdu, "Masters", 1) :-
+    member(UserEdu, ["Masters"]).
+measureEducation(UserEdu, "Undergraduate", 1) :- 
+    member(UserEdu, ["Undergraduate", "Masters"]).
+measureEducation(UserEdu, "HighSchool", 1) :- 
+    member(UserEdu, ["HighSchool","Undergraduate", "Masters"]).
+measureEducation(_,_ , 0).
+
+
+% We use for Experience
+% - 
+% - 
+% base case
+measureExperience([], _, 0).
+% case where programming language is a job requirement and user does have enough experience
+measureExperience([(P, E)|T], List, Score) :- 
+    member((P, X), List), 
+    X =< E, 
+    measureExperience(T, List, ScoreNew), 
+    Score is ScoreNew + 1. 
+    
+% case where programming language is a job requirement and user does NOT have enough experience
+measureExperience([(P, E)|T], List, Score) :-
+    member((P, X), List),
+    E < X,
+    measureExperience(T, List, Score).
+
+% case where programming language is not a job requirement 
+measureExperience([(P, _)|T], List, Score) :-
+    not(member((P, _), List)),
+    measureExperience(T, List, Score).
+
+
+% Unused Function
+compareYear(_, [], 0).
+compareYear((P,E), [(P, X)| _], 1) :-
+    E >= X.
+
+compareYear((P,E), [(P, X)| T], Score) :-
+    E < X,
+    compareYear((P,E), T, Score).
+
+compareYear((P,E), [(D, _)| T], Score) :-
+    dif(P, D),
+    compareYear((P,E), T, Score).
+
+    
+% ========================
+% Program Helper Functions
+% ========================
+
+% ---------------------------
+% Query 1: Job Posting Filter
+% ---------------------------
+jobFilter(Loc, Ind, Dead, Pos, Sal, Full, Rem) :-
+    findall(J, prop(J, type, job), List),
+    filterOut(location, Loc, List, L),
+    filterOut(industry, Ind, L, I),
+    filterOut(deadline, Dead, I, D),
+    filterOut(position, Pos, D, P),
+    filterOut(salary, Sal, P, S),
+    filterOut(isFulltime, Full, S, F),
+    filterOut(isRemote, Rem, F, R),
+    write('\n'),
+    checkEmpty(R),
+    write('\n'),
+    write('\n'),
+    ask().
+
+% if x given, then ignore filter
+filterOut(_, x, List, List).
+filterOut(_, _, [], []).
+filterOut(Prop, Val, [H|T], [H|R]) :-
+    prop(H, Prop, Val),
+    filterOut(Prop, Val, T, R).
+
+filterOut(Prop, Val, [H|T], R) :-
+    not(prop(H, Prop, Val)),
+    filterOut(Prop, Val, T, R).
+
+checkEmpty([]):-
+    write('\n No Jobs Matching Criteria \n').
+
+checkEmpty(List):-
+    showJobList(List).
+
+% List of JobIds
+showJobList([]).
+showJobList([H|T]):-
+    showJob(H),
+    showJobList(T).
+
+showJob(JobId):-
+    findLocation(JobId, Loc),
+    findIndustry(JobId, Ind),
+    findDeadline(JobId, Dea),
+    findPosition(JobId, Pos),
+    findSalary(JobId, Sal),
+    findIsFulltime(JobId, Ful),
+    findIsRemote(JobId, Rem),
+    findLanguages(JobId, LL),
+    findPrograms(JobId, PL),
+    findEducation(JobId, ED),
+    findExperience(JobId, EL),
+    write('\n   Job ID#:    '),
+    write(JobId),
+    write('\n'),
+    printLocation(Loc),
+    printIndustry(Ind),
+    printDeadline(Dea),
+    printPosition(Pos),
+    printSalary(Sal),
+    printIsFulltime(Ful),
+    printIsRemote(Rem),
+    write('-> Languages   '), write('Qualifications \n'),
+    printLanguages(LL),
+    write('-> Programs    '), write('Qualifications \n'),
+    printPrograms(PL),
+    write('-> Education   '), write('Qualification  \n'),
+    printEducation(ED),
+    write('-> Experience  '), write('Qualifications \n'),
+    printExperience(EL).
+
+% ---------------------------
+% Query 2: Resume Creation
+% ---------------------------
+checkUserQ2(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    write('\n User Already Exists \n'),
+    ask().
+
+checkUserQ2(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    creation(Username).  
+
+creation(Username) :-
   write('\n What language do you speak? \n'),
   read(Language),
   write('\n What is a computer program you are most familiar with? \n'),
@@ -61,11 +275,23 @@ query(Input) :-
   write('\n Resume created! \n'),
   ask().
 
-% Update a users resume
-query(Input) :-
-  Input = 3,
-  write('\n What is your name? \n'),
-  read(Username),
+
+% ---------------------------
+% Query 3: Resume Updating
+% ---------------------------
+
+checkUserQ3(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    write('\n User Not Found \n'),
+    ask().
+
+checkUserQ3(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    update(Username).  
+
+update(Username) :-
   write('\n What would you like to add to your resume?: \n
         1. A spoken language \n 
         2. A computer program you are familar with \n
@@ -73,105 +299,13 @@ query(Input) :-
   read(Choice),
   updatePrompt(Username, Choice). 
 
-% Prints a users resume
-query(Input) :- 
-  Input = 4,
-  write('\n What is your name? \n'),
-  read(Username),
-  findLanguages(Username, LangList),
-  write('\n Your languages: \n'),
-  write(LangList),
-  findPrograms(Username, ProgList),
-  write('\n Your known computer programs: \n'), 
-  write(ProgList),
-  findEducation(Username, EdList),
-  write('\n Your education: \n'), 
-  write(EdList),
-  findExperience(Username, ExpList),
-  write('\n Your programming languages and years of experience in each: \n'), 
-  write(ExpList),
-  ask().
-
-% Measures a users resume
-query(Input) :- % todo !!!
-  Input = 5,
-  % something like: what is your name -> find user qualifications -> find all job scoring properties -> count how many of these the user has
-  % print: jobs user is qualified for? skills user is missing that are in our KB? percentage of properies user has out of all properties?
-  % just spitballing here
-  write('\n What is your name? \n'),
-  read(Username),
-  findall(P, prop(Username, Q, V), List), % find all of the users qualifications
-  nl.
-  
-
-% ========================
-% Helper Functions
-% ========================
-
-jobFilter(Loc, Ind, Dead, Pos, Sal, Full, Rem) :-
-    findall(J, prop(J, type, job), List),
-    filterOut(location, Loc, List, L),
-    filterOut(industry, Ind, L, I),
-    filterOut(deadline, Dead, I, D),
-    filterOut(position, Pos, D, P),
-    filterOut(salary, Sal, P, S),
-    filterOut(isFulltime, Full, S, F),
-    filterOut(isRemote, Rem, F, R),
-    write('Job Ids: '),
-    write(R), % debugging
-    showJobList(R),
-    write('\n'),
-    write('\n'),
-    ask().
-
-% if x given, then ignore filter
-filterOut(_, x, List, List).
-filterOut(_, _, [], []).
-filterOut(Prop, Val, [H|T], [H|R]) :-
-    prop(H, Prop, Val),
-    filterOut(Prop, Val, T, R).
-
-filterOut(Prop, Val, [H|T], R) :-
-    not(prop(H, Prop, Val)),
-    filterOut(Prop, Val, T, R).
-
-showJobList([]).
-showJobList([H|T]):-
-    showJob(H),
-    showJobList(T).
-
-showJob(JobId):-
-    findall((P,V), prop(JobId, P, V), List),
-    write('\n Job Posting : '),
-    write(JobId),
-    write('\n'),
-    printPropVal(List).
-
-printPropVal([]).
-printPropVal([(P,V)|T]):-
-    member(P, [ location, industry, 
-                deadline, position, 
-                salary, isFulltime, isRemote]),
-    write('-> '),
-    write(P),
-    write('  '),
-    write(V),
-    write('\n'),
-    printPropVal(T).
-
-printPropVal([(P,V)|T]):-
-    not(member(P, [ location, industry, 
-                deadline, position, 
-                salary, isFulltime, isRemote])),
-    printPropVal(T). 
-
 % Helper to update a resume, adds a spoken language
 updatePrompt(Username, Choice) :-
    Choice = 1, 
    write('\n What language would you like to add? \n'), 
    read(Language),
    assertz(prop(Username, language, Language)),
-   write('\n Thank you! \n'),
+   write('\n Updated! \n'),
    ask().
 
 % Helper to update a resume, adds a computer program
@@ -180,7 +314,7 @@ updatePrompt(Username, Choice) :-
    write('\n What program would you like to add? \n'), 
    read(Program),
    assertz(prop(Username, programs, Program)),
-   write('\n Thank you! \n'),
+   write('\n Updated! \n'),
    ask().
 
 % Helper to update a resume, adds a programming language
@@ -190,12 +324,124 @@ updatePrompt(Username, Choice) :-
    read(PLanguage),
    write('\n How many years of experience do you have coding with it? \n'),
    read(Years),
+   findall(V, prop(Username, experience, (PLanguage, V)), Vals),
+   removeExperiences(Username, PLanguage, Vals),
    assertz(prop(Username, experience, (PLanguage, Years))),
-   write('\n Thank you! \n'),
+   write('\n Updated! \n'),
    ask().
 
+updatePrompt(Username, _) :-
+    write('\n Invalid Input \n'),
+    update(Username).
+
+removeExperiences(_, _, []).
+removeExperiences(Username, PLanguage, [H|T]) :-
+    retract(prop(Username, experience, (PLanguage, H))),
+    removeExperiences(Username, PLanguage, T).
+
+% ---------------------------
+% Query 4: Resume Showing
+% ---------------------------
+
+checkUserQ4(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    write('\n User Not Found \n'),
+    ask().
+
+checkUserQ4(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    show(Username). 
+
+show(Username) :-
+  findQualifications(Username, LangList, ProgList, EdList, ExpList),
+  write('\n Your languages: \n'),
+  printList(LangList),
+  write('\n Your known computer programs: \n'), 
+  printList(ProgList),
+  write('\n Your education: \n'), 
+  write('     - '),
+  write(EdList),
+  write('\n'),
+  write('\n Your programming languages and years of experience in each: \n'), 
+  printList(ExpList),
+  nl,
+  ask().
+
+% ---------------------------
+% Query 5: Resume Measure
+% ---------------------------
+
+checkUserQ5(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    write('\n User Not Found \n'),
+    ask().
+
+checkUserQ5(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    measure(Username). 
+
+measure(Username) :-
+  findall(J, prop(J, type, job), JList), %find all of the jobs
+  measureJobList(Username, JList),
+  nl,
+  ask().
+
+% ========================
+% Utility Functions
+% ========================
+
+
+listToSet([], []).
+listToSet([H|T], X) :-
+    member(H, T),
+    listToSet(T, X).
+
+listToSet([H|T], [H|X]) :-
+    not(member(H, T)),
+    listToSet(T, X).
+
+
+% ========================
+% Getter Functions
+% ========================
+
+% Helper to find all qualifications
+findQualifications(ID, LangSet, ProgSet, Edu, ExpSet) :-
+    findSetLanguages(ID, LangSet),
+    findSetPrograms(ID, ProgSet),
+    findEducation(ID, Edu),
+    findSetExperience(ID, ExpSet).
+
+
+% Filter Getters
+findLocation(ID, V) :-
+    prop(ID, location, V).
+
+findIndustry(ID, V) :-
+    prop(ID, industry, V).
+
+findDeadline(ID, V) :-
+    prop(ID, deadline, V).
+
+findPosition(ID, V) :-
+    prop(ID, position, V).
+
+findSalary(ID, V) :-
+    prop(ID, salary, V).
+
+findIsFulltime(ID, V) :-
+    prop(ID, isFulltime, V).   
+
+findIsRemote(ID, V) :-
+    prop(ID, isRemote, V).                 
+
+% Scoring Getters
 findLanguages(ID, LL) :-
-    findall(V, prop(ID, languages, V), LL).
+    findall(V, prop(ID, language, V), LL).
 
 findPrograms(ID, PL) :-
     findall(V, prop(ID, programs, V), PL). 
@@ -205,6 +451,110 @@ findEducation(ID, ED) :-
 
 findExperience(ID, EL) :-
     findall(V, prop(ID, experience, V), EL).
+    
+% Set Scoring Getters 
+findSetLanguages(ID, Set) :-
+    findLanguages(ID, List),
+    listToSet(List, Set).
+
+findSetPrograms(ID, Set) :-
+    findPrograms(ID, List),
+    listToSet(List, Set).
+
+findSetExperience(ID, Set) :-
+    findExperience(ID, List),
+    listToSet(List, Set).            
+
+% ========================
+% Printer Functions
+% ========================
+
+printList([]).
+printList([H|T]) :-
+    write('     - '),
+    write(H),
+    write('\n'),
+    printList(T).
+
+% Print filter properties
+printLocation(V) :-
+    write('-> Location    '),
+    write(V),
+    write('\n').
+
+printIndustry(V) :-
+    write('-> Industry    '),
+    write(V),
+    write('\n'). 
+
+printDeadline(V) :-
+    write('-> Deadline    '),
+    write(V),
+    write('\n'). 
+
+printPosition(V) :-
+    write('-> Position    '),
+    write(V),
+    write('\n').  
+
+printSalary(V) :-
+    write('-> Salary      $'),
+    write(V),
+    write('/hr'),
+    write('\n').  
+
+printIsFulltime(0) :-
+    write('-> Fulltime?   '),
+    write('No'),
+    write('\n').  
+printIsFulltime(1) :-
+    write('-> Fulltime?   '),
+    write('Yes'),
+    write('\n').   
+
+printIsRemote(0) :-
+    write('-> Remote?     '),
+    write('No'),
+    write('\n').  
+printIsRemote(1) :-
+    write('-> Remote?     '),
+    write('Yes'),
+    write('\n').    
+
+% Print Scoring properties
+% - Languages
+% - Programs
+% - Education 
+% - Experience(s) 
+printLanguages([]).
+printLanguages([H|T]) :-
+    write('               '), write('- '),
+    write(H),
+    write('\n'),
+    printLanguages(T).
+
+printPrograms([]).
+printPrograms([H|T]) :-
+    write('               '), write('- '),
+    write(H),
+    write('\n'),
+    printPrograms(T).  
+
+printEducation(ED) :-
+    write('               '), write('- '),
+    write(ED),
+    write('\n').
+
+printExperience([]).
+printExperience([(PL,YOE)|T]) :-
+    write('               '), write('- '),
+    write(PL),
+    write(', '),
+    write(YOE),
+    write(' Years'),
+    write('\n'),
+    printExperience(T). 
+
 
 % ========================
 % Resume Encoding
@@ -301,6 +651,7 @@ prop(001, language, "English").
 prop(001, programs, "Microsoft Excel").
 prop(001, education, "Undergraduate").
 prop(001, experience, ("C", 4)).
+prop(001, experience, ("Python", 5)).
 
 prop(002, language, "English").
 prop(002, programs, "MATLAB").
