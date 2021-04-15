@@ -10,7 +10,9 @@ ask() :-
         2. Create your Resume \n
         3. Update your Resume \n
         4. Show your Resume \n 
-        5. Measure your Resume \n'),
+        5. Measure your Resume \n
+        6. Save your Resume to a new file \n
+        7. Quit \n'),
     readTerminal(Input),
     query(Input).
 
@@ -69,8 +71,20 @@ query(Input) :-
   readTerminal(Username),
   checkUserQ5(Username).
 
+% Saves a users resume to a new file
+query(Input) :- 
+  Input = '6',
+  write('\n What is your name? \n'),
+  readTerminal(Username),
+  checkUserQ6(Username).
+
+% Quits program
+query(Input) :- 
+  Input = '7',
+  halt(0).
+
 query(Input) :-
-    not(member(Input, ['1', '2', '3', '4', '5'])),
+    not(member(Input, ['1', '2', '3', '4', '5', '6', '7'])),
     write('\n Invalid Input \n'),
     ask().
 
@@ -412,6 +426,48 @@ measure(Username) :-
   nl,
   ask().
 
+% ---------------------------
+% Query 6: Save Resume to File
+% ---------------------------
+
+checkUserQ6(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    write('\n User Not Found \n'),
+    ask().
+
+checkUserQ6(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    saveToFile(Username). 
+
+saveToFile(Username) :-
+  write('\n What do you want the file name to be? (Add .txt extension) \n'),
+  readTerminal(FileName),
+  open(FileName,write,Out),
+  writeResume(Out, Username),
+  close(Out),
+  write('\n Resume saved to file named: '),
+  write(FileName),
+  nl,
+  ask().
+
+writeResume(Out, Username) :-
+  write(Out, 'Resume for '),
+  write(Out, Username),
+  nl,
+  findQualifications(Username, LangList, ProgList, EdList, ExpList),
+  write(Out, '\n Your languages: \n'),
+  writeList(Out, LangList),
+  write(Out, '\n Your known computer programs: \n'), 
+  writeList(Out, ProgList),
+  write(Out, '\n Your education: \n'), 
+  write(Out, '     - '),
+  write(Out, EdList),
+  write(Out, '\n'),
+  write(Out, '\n Your programming languages and years of experience in each: \n'), 
+  writeList(Out, ExpList).
+
 % ========================
 % Utility Functions
 % ========================
@@ -508,6 +564,25 @@ printList([H|T]) :-
     write(H),
     write('\n'),
     printList(T).
+
+% Generic for writing lists
+% Base case, empty list
+writeList(Out, []).
+% Case where elements are in pairs (e.g. programming language and years of experience)
+writeList(Out, [(X, Y)|T]) :-
+    write(Out, '     - '),
+    write(Out, X),
+    write(Out, ', '),
+    write(Out, Y),
+    write(Out, '\n'),
+    writeList(Out, T).
+% Case where elements are not in pairs
+writeList(Out, [H|T]) :-
+    write(Out, '     - '),
+    write(Out, H),
+    write(Out, '\n'),
+    writeList(Out, T).
+
 
 % Print filter properties
 printLocation(V) :-
