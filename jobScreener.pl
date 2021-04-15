@@ -107,28 +107,32 @@ checkNumber(In, Out2) :-
     checkNumber(In2, Out2).  
 
 
-% ===========
-% Iterate over list of jobs
-% =========
+% ===================
+% Recommend Functions
+% ===================
 
-measureJobList(_, []).
-measureJobList(Username, [J|T]) :-
-    findQualifications(Username, ULangList, UProgList, UEd, UExpList), % Maybe move out
-    findQualifications(J, JLangList, JProgList, JEd, JExpList),
-    % Start measuring
-    checkWithin(ULangList, JLangList, LangScore),
-    checkWithin(UProgList, JProgList, ProgScore),
-    measureEducation(UEd, JEd, EduScore),
-    measureExperience(UExpList, JExpList, ExpScore),
-    getTotalQualScore(J, TotalQ),
-    TotalScore is LangScore + ProgScore + EduScore + ExpScore, 
-    PercentQ is (TotalScore / TotalQ) * 100,
-    write('\n You are '),
-    write(PercentQ),
-    write('% qualified to work job number '),
-    write(J),
-    write('! \n'),
-    measureJobList(Username, T).
+% We can use for
+% - Languages
+% - Programs 
+takeNotWithin([], _, []).
+takeNotWithin([H|T], List, Dict) :- 
+    member(H, List), 
+    takeNotWithin(T, List, Dict).
+    
+takeNotWithin([H|T], List, Dict) :-
+    not(member(H, List)), 
+    incrementKey(H, Dict),
+    checkWithin(T, List, Dict).
+
+incrementKey(Key, Dict) :-
+    member((Key, _), Dict),
+    incrementVal(Key, Dict)
+
+searchDict(Key, [(DKey, Val) | Dict], [(Key, NewVal) | Dict]) :-
+    not(dif(Key, DKey)),
+    NewVal is Val + 1.
+
+    
 
 
 % ========================
@@ -436,6 +440,55 @@ measure(Username) :-
   nl,
   ask().
 
+measureJobList(_, []).
+measureJobList(Username, [J|T]) :-
+    findQualifications(Username, ULangList, UProgList, UEd, UExpList), % Maybe move out
+    findQualifications(J, JLangList, JProgList, JEd, JExpList),
+    % 'Start measuring'
+    checkWithin(ULangList, JLangList, LangScore),
+    checkWithin(UProgList, JProgList, ProgScore),
+    measureEducation(UEd, JEd, EduScore),
+    measureExperience(UExpList, JExpList, ExpScore),
+    length(JLangList, JLangTot),
+    length(JProgList, JProgTot),
+    length(JExpList, JExpTot),
+    getTotalQualScore(J, TotalQ),
+    TotalScore is LangScore + ProgScore + EduScore + ExpScore, 
+    % 'Calculations'
+    PercentLang is (LangScore / JLangTot) *100,
+    PercentProg is (ProgScore / JProgTot) *100,
+    PercentEdu is (EduScore / 1) *100,
+    PercentExp is (ExpScore / JExpTot) *100,
+    PercentQ is (TotalScore / TotalQ) * 100,
+    printQualPercent(J,PercentLang, PercentProg, PercentEdu, PercentExp, PercentQ),
+    measureJobList(Username, T).
+
+% ---------------------------
+% Query 8: Resume Recommendation
+% ---------------------------
+checkUserQ8(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    not(member(Username, Users)),
+    write('\n User Not Found \n'),
+    ask().
+
+checkUserQ8(Username) :-
+    findall(U, prop(U, type, applicant), Users),
+    member(Username, Users),
+    recommend(Username). 
+
+recommend(Username) :-
+  findall(J, prop(J, type, job), JList), 
+  recommendJobList(Username, JList, Result),
+  % do print stuff 
+  nl,
+  ask().
+
+recommendJobList(Username, [J|T], Result) :-
+    findQualifications(Username, ULangList, UProgList, UEd, UExpList), 
+    findQualifications(J, JLangList, JProgList, JEd, JExpList),
+    recommendJobList(Username, T).
+
 % ---------------------------
 % Query 6: Save Resume to File
 % ---------------------------
@@ -672,6 +725,14 @@ printExperience([(PL,YOE)|T]) :-
     write(' Years'),
     write('\n'),
     printExperience(T). 
+
+printQualPercent(JobId, LangP, ProgP, EduP, ExpP, TotalP) :-
+    write('\n Qualification Summary: Job ID# '),write(JobId),write('\n'),
+    write('\n Languages  '), write(LangP),write('%'),
+    write('\n Programs   '), write(ProgP),write('%'),
+    write('\n Education  '), write(EduP),write('%'),
+    write('\n Experience '), write(ExpP),write('%'),
+    write('\n Overall:   '), write(TotalP),write('%\n').
 
 
 % ========================
