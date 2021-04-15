@@ -33,13 +33,13 @@ query(Input) :-
   readTerminal(Position),
   write('\n What salary do you desire? (dollars per hour) \n'),
   readTerminal(S),
-  atom_number(S, Salary),
+  checkNumber(S, Salary),
   write('\n Are you looking for full time work? Enter \'1\' if so, \'0\' if not \n'),
   readTerminal(I1),
-  atom_number(I1, IsFullTime),
+  checkNumber(I1, IsFullTime),
   write('\n Are you looking for remote work? Enter \'1\' if so, \'0\' if not \n'),
   readTerminal(I2),
-  atom_number(I2, IsRemote),
+  checkNumber(I2, IsRemote),
   jobFilter(Location, Industry, Position, Salary, IsFullTime, IsRemote).
 
 % Create a users resume
@@ -95,6 +95,16 @@ readTerminal(Out) :-
   flush_output(current_output),
   readln(Ln),
   atomic_list_concat(Ln, ' ', Out).
+
+checkNumber('x', 'x').
+checkNumber(In, Out) :-
+    atom_number(In, Out).
+
+checkNumber(In, Out2) :-
+    not(atom_number(In, _)),
+    write("\n Not a number. Try again \n"),
+    readTerminal(In2),
+    checkNumber(In2, Out2).  
 
 
 % ===========
@@ -217,7 +227,7 @@ jobFilter(Loc, Ind, Pos, Sal, Full, Rem) :-
     ask().
 
 % if x given, then ignore filter
-filterOut(_, x, List, List).
+filterOut(_, 'x', List, List).
 filterOut(_, _, [], []).
 
 % special case for salary, where the desired salary can be less than the one offered
@@ -567,7 +577,7 @@ printList([H|T]) :-
 
 % Generic for writing lists
 % Base case, empty list
-writeList(Out, []).
+writeList(_, []).
 % Case where elements are in pairs (e.g. programming language and years of experience)
 writeList(Out, [(X, Y)|T]) :-
     write(Out, '     - '),
@@ -596,7 +606,7 @@ printIndustry(V) :-
     write('\n'). 
 
 printDeadline(V) :-
-    write('-> Application Deadline:    '),
+    write('-> Deadline    '),
     write(V),
     write('\n'). 
 
