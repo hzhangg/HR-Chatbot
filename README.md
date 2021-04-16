@@ -29,11 +29,11 @@ User's may search for job postings based on:
 
 All jobs that satisfy your interests will have their details printed.
 
-# In the case none match the criterion:
+# In the case none match the criterion
 
-No Jobs Matching Criteria 
+**No Jobs Matching Criteria **
    
-# Otherwise, a typical job may looks as follows:
+# Otherwise, a typical job may looks as follows
 
 **Job ID#:**    1
 
@@ -49,7 +49,7 @@ No Jobs Matching Criteria
 
 **Remote?**     Yes
 
-**Deadline **   1/31/2022
+**Deadline**   1/31/2022
 
 **Languages   Qualifications**
 - English
@@ -60,7 +60,7 @@ No Jobs Matching Criteria
 **Education   Qualification**  
 - Undergraduate
 
-**Experience  Qualifications **
+**Experience  Qualifications**
 - C, 4 Years
 - Python, 5 Years
 
