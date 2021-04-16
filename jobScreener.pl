@@ -12,7 +12,8 @@ ask() :-
         4. Show your Resume \n 
         5. Measure your Resume \n
         6. Save your Resume to a new file \n
-        7. Quit \n'),
+        7. Quit \n
+        8. Diff Resume \n'),
     readTerminal(Input),
     query(Input).
 
@@ -83,8 +84,15 @@ query(Input) :-
   Input = '7',
   halt(0).
 
+% Diffs users resume against all jobs 
 query(Input) :-
-    not(member(Input, ['1', '2', '3', '4', '5', '6', '7'])),
+  Input = '8',
+  write('\n What is your name? \n'),
+  readTerminal(Username),
+  checkUserQ8(Username).
+
+query(Input) :-
+    not(member(Input, ['1', '2', '3', '4', '5', '6', '7', '8'])),
     write('\n Invalid Input \n'),
     ask().
 
@@ -114,25 +122,80 @@ checkNumber(In, Out2) :-
 % We can use for
 % - Languages
 % - Programs 
-takeNotWithin([], _, []).
-takeNotWithin([H|T], List, Dict) :- 
-    member(H, List), 
-    takeNotWithin(T, List, Dict).
+addAbsentLangProg([], _, D, D).
+% case where qualified, dont add to Dict 
+addAbsentLangProg([H|T], UserList, TempDict, ResDict) :- 
+    member(H, UserList), 
+    addAbsentLangProg(T, UserList, TempDict, ResDict).
+
+% case where unqualified, add to Dict   
+addAbsentLangProg([H|T], UserList, TempDict, ResDict) :-
+    not(member(H, UserList)), 
+    incrementKey(H, TempDict, ModDict),
+    addAbsentLangProg(T, UserList, ModDict, ResDict).
+
+% We can use for
+% - Education 
+% ['HighSchool', 'Undergraduate', 'Masters']
+% case where qualified, dont add to Dict 
+addAbsentEdu(_, 'Masters', D, D).
+addAbsentEdu(JEdu, 'Undergraduate', D, D) :- 
+    member(JEdu, ['HighSchool', 'Undergraduate']).
+addAbsentEdu(JEdu, 'HighSchool', D, D) :- 
+    member(JEdu, ['HighSchool']).
+
+% case where unqualified, add to Dict 
+addAbsentEdu(JEdu, UserEdu, TempDict, ModDict) :-
+    dif(JEdu, UserEdu),
+    incrementKey(JEdu, TempDict, ModDict). 
+
+% We can use for
+% - Experience 
+addAbsentExperience([], _, D, D).
+% case where qualified, dont add to Dict 
+addAbsentExperience([(P, E)|T], UserList, TempDict, ResDict) :- 
+    member((P, X), UserList), 
+    atom_number(X, XN),
+    atom_number(E, EN),
+    EN =< XN, 
+    addAbsentExperience(T, UserList, TempDict, ResDict).
     
-takeNotWithin([H|T], List, Dict) :-
-    not(member(H, List)), 
-    incrementKey(H, Dict),
-    checkWithin(T, List, Dict).
+% case where unqualified - lacks experience - , add to Dict 
+addAbsentExperience([(P, E)|T], UserList, TempDict, ResDict) :-
+    member((P, X), UserList),
+    atom_number(X, XN),
+    atom_number(E, EN),
+    EN > XN,
+    incrementKey((P,E), TempDict, ModDict),
+    addAbsentExperience(T, UserList, ModDict, ResDict).
 
-incrementKey(Key, Dict) :-
+% case where unqualified - lacks lang, exp - , add to Dict 
+addAbsentExperience([(P, E)|T], UserList, TempDict, ResDict) :-
+    not(member((P, E), UserList)),
+    incrementKey((P,E), TempDict, ModDict),
+    addAbsentExperience(T, UserList, ModDict, ResDict).
+
+
+% Dictionary Helpers
+% - modifies the key val by + 1 or creates the key,val pair
+incrementKey(Key, Dict, ModDict) :-
     member((Key, _), Dict),
-    incrementVal(Key, Dict)
+    modifyDict(Key, Dict, ModDict).
 
-searchDict(Key, [(DKey, Val) | Dict], [(Key, NewVal) | Dict]) :-
+incrementKey(Key, Dict, [(Key, 1)| Dict]) :-
+    not(member((Key, _), Dict)).
+
+
+modifyDict(_, [], []).
+modifyDict(Key, [(DKey, Val) | Dict], [(Key, NewVal) | Dict]) :-
     not(dif(Key, DKey)),
     NewVal is Val + 1.
 
-    
+modifyDict(Key, [(DKey, Val) | Dict], [(DKey, Val) | ModDict]) :-
+    dif(Key, DKey),
+    modifyDict(Key, Dict, ModDict).
+
+
 
 
 % ========================
@@ -194,19 +257,6 @@ measureExperience([(P, _)|T], List, Score) :-
     not(member((P, _), List)),
     measureExperience(T, List, Score).
 
-
-% Unused Function
-compareYear(_, [], 0).
-compareYear((P,E), [(P, X)| _], 1) :-
-    E >= X.
-
-compareYear((P,E), [(P, X)| T], Score) :-
-    E < X,
-    compareYear((P,E), T, Score).
-
-compareYear((P,E), [(D, _)| T], Score) :-
-    dif(P, D),
-    compareYear((P,E), T, Score).
 
     
 % ========================
@@ -272,9 +322,7 @@ showJob(JobId):-
     findPrograms(JobId, PL),
     findEducation(JobId, ED),
     findExperience(JobId, EL),
-    write('\n   Job ID#:    '),
-    write(JobId),
-    write('\n'),
+    write('\n   Job ID#:    '), write(JobId), write('\n'),
     printLocation(Loc),
     printIndustry(Ind),
     printPosition(Pos),
@@ -283,14 +331,18 @@ showJob(JobId):-
     printIsRemote(Rem),
     printDeadline(Dea),
     write('\n'),
-    write('-> Languages   '), write('Qualifications \n'),
+    write('-  Languages   '), write('Qualifications \n'),
     printLanguages(LL),
-    write('-> Programs    '), write('Qualifications \n'),
+    nl,
+    write('-  Programs    '), write('Qualifications \n'),
     printPrograms(PL),
-    write('-> Education   '), write('Qualification  \n'),
+    nl,
+    write('-  Education   '), write('Qualification  \n'),
     printEducation(ED),
-    write('-> Experience  '), write('Qualifications \n'),
-    printExperience(EL).
+    nl,
+    write('-  Experience  '), write('Qualifications \n'),
+    printExperience(EL),
+    nl.
 
 % ---------------------------
 % Query 2: Resume Creation
@@ -479,15 +531,66 @@ checkUserQ8(Username) :-
 
 recommend(Username) :-
   findall(J, prop(J, type, job), JList), 
-  recommendJobList(Username, JList, Result),
+  recommendJobList( Username, JList, 
+                    [], [], [], [], 
+                    NDLang, NDProg, NDEdu, NDExp),
   % do print stuff 
+  sort(NDLang, SDLang),
+  sort(NDProg, SDProg),
+  sort(NDEdu, SDEdu),
+  sort(NDExp, SDExp),
+  write('\n ------------------------------ \n'),
+  write('\n Personalized Qualification Summary \n'),
+  write('   Shown below are your missing qualifications \n'),
+  write('   along with the amount of jobs that desire it. \n'),
+  printHeaderDict('Languages'),
+  checkEmptyDict(SDLang),
+  printKeyDict(SDLang),nl,
+  printHeaderDict('Programs'),
+  checkEmptyDict(SDProg),
+  printKeyDict(SDProg),nl,
+  printHeaderDict('Education'),
+  checkEmptyDict(SDEdu),
+  printKeyDict(SDEdu),nl,
+  printHeaderDict('Experience'),
+  checkEmptyDict(SDExp),
+  printPairDict(SDExp),nl,
+  write('\n ------------------------------ \n'),
   nl,
   ask().
 
-recommendJobList(Username, [J|T], Result) :-
-    findQualifications(Username, ULangList, UProgList, UEd, UExpList), 
-    findQualifications(J, JLangList, JProgList, JEd, JExpList),
-    recommendJobList(Username, T).
+checkEmptyDict([]) :-
+    write("\n   <<CATAGORY SATISFIED>>").
+checkEmptyDict(_).
+
+printHeaderDict(Property) :-
+    write('\n '), write(Property),
+    write('\n   #Jobs    Qualification').
+
+printKeyDict([]).
+printKeyDict([(Key, Val)| T]) :- 
+    write('\n   '), write(Val),
+    write('        '), write(Key),
+    printKeyDict(T).
+
+printPairDict([]).
+printPairDict([((PL, Ex), Val)|T]) :-
+    write('\n   '), write(Val),
+    write('        '), write(PL), write(' '), write(Ex), write(' Years'),
+    printPairDict(T).  
+
+recommendJobList(_, [], LA, PR, ED, EX, LA, PR, ED, EX).
+recommendJobList(Username, [J|T], ODLang, ODProg, ODEdu, ODExp, NDLang, NDProg, NDEdu, NDExp) :-
+    findQualifications(Username, ULangList, UProgList, UEdu, UExpList), 
+    findQualifications(J, JLangList, JProgList, JEdu, JExpList),
+    % Start Building a Diff Qual Dictionary 
+    addAbsentLangProg(JLangList, ULangList, ODLang, MDLang),
+    addAbsentLangProg(JProgList, UProgList, ODProg, MDProg),
+    addAbsentEdu(JEdu, UEdu, ODEdu, MDEdu),
+    addAbsentExperience(JExpList, UExpList, ODExp, MDExp),
+    recommendJobList(Username, T, 
+                     MDLang, MDProg, MDEdu, MDExp,
+                     NDLang, NDProg, NDEdu, NDExp).
 
 % ---------------------------
 % Query 6: Save Resume to File
@@ -649,46 +752,46 @@ writeList(Out, [H|T]) :-
 
 % Print filter properties
 printLocation(V) :-
-    write('-> Location    '),
+    write('-  Location    '),
     write(V),
     write('\n').
 
 printIndustry(V) :-
-    write('-> Industry    '),
+    write('-  Industry    '),
     write(V),
     write('\n'). 
 
 printDeadline(V) :-
-    write('-> Deadline    '),
+    write('-  Deadline    '),
     write(V),
     write('\n'). 
 
 printPosition(V) :-
-    write('-> Position    '),
+    write('-  Position    '),
     write(V),
     write('\n').  
 
 printSalary(V) :-
-    write('-> Salary      $'),
+    write('-  Salary      $'),
     write(V),
     write('/hr'),
     write('\n').  
 
 printIsFulltime(0) :-
-    write('-> Fulltime?   '),
+    write('-  Fulltime?   '),
     write('No'),
     write('\n').  
 printIsFulltime(1) :-
-    write('-> Fulltime?   '),
+    write('-  Fulltime?   '),
     write('Yes'),
     write('\n').   
 
 printIsRemote(0) :-
-    write('-> Remote?     '),
+    write('-  Remote?     '),
     write('No'),
     write('\n').  
 printIsRemote(1) :-
-    write('-> Remote?     '),
+    write('-  Remote?     '),
     write('Yes'),
     write('\n').    
 
@@ -699,26 +802,26 @@ printIsRemote(1) :-
 % - Experience(s) 
 printLanguages([]).
 printLanguages([H|T]) :-
-    write('               '), write('- '),
+    write('               '), write('-> '),
     write(H),
     write('\n'),
     printLanguages(T).
 
 printPrograms([]).
 printPrograms([H|T]) :-
-    write('               '), write('- '),
+    write('               '), write('-> '),
     write(H),
     write('\n'),
     printPrograms(T).  
 
 printEducation(ED) :-
-    write('               '), write('- '),
+    write('               '), write('-> '),
     write(ED),
     write('\n').
 
 printExperience([]).
 printExperience([(PL,YOE)|T]) :-
-    write('               '), write('- '),
+    write('               '), write('-> '),
     write(PL),
     write(', '),
     write(YOE),
