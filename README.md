@@ -107,7 +107,7 @@ We also have a feature for users to request insight of what skills to focus on a
 - We compile your missing qualifications alphabetically
 - We determine how many jobs require the skill
 
-Knowing this, users are able to judge which skills they should priortize to become a better candidate. 
+Knowing this, users are able to judge which skills they should priortize to become a better candidate and aid users in their planning process
 
 This was implemented with a Dictionary structure recreated through Prolog.
 
