@@ -8,6 +8,7 @@ To try our app,
 2. Run "main."
 
 << Description >> 
+--
 Our HR-Chatbot lets users query against our database of encoded job postings. Users can create their own resume and modify it on the fly for further interactions in the session.
 
 Features Include:
@@ -19,6 +20,7 @@ Features Include:
 
 
 << Searching >>
+--
 User's may search for job postings based on:
 - Location
 - Industry 
@@ -29,12 +31,10 @@ User's may search for job postings based on:
 
 All jobs that satisfy your interests will have their details printed.
 
-In the case none match the criterion.
---------------------------------------
+In the case none match the criterion:
    No Jobs Matching Criteria 
    
 Otherwise, a typical job may looks as follows:
-----------------------------------------------
    Job ID#:    1
 -  Location    Vancouver
 -  Industry    Computer Science
@@ -58,7 +58,8 @@ Otherwise, a typical job may looks as follows:
                -> Python, 5 Years
 
 
-Other
+<< Other >>
+--
 Input validation
 - wrong inputs
 - not a number 
