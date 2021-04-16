@@ -11,14 +11,21 @@ To try our app,
 Our HR-Chatbot lets users query against our database of encoded job postings. Users can create their own resume and modify it on the fly for further interactions in the session.
 
 Features Include:
+- A pleasant text formatted UI
 - Search Job Postings according to optional criterion
 - Lookup definitions of terms you may not know
-- Create, update, and view resumes
+- Create, update, view, and save resumes
 - Measure your Qualifications against jobs
 - Receive insight on your missing skills and their relevancy in jobs
 
 
-## Searching 
+Our program is has many quality of life features such as:
+- Input validation (ex. number, wrong input)
+- Input processing (ex. no need to sumbit answers in "" or with period)
+- Skipping inputs (ex. type 'x' to skip the search criteria)
+
+
+## Searching Jobs
 User's may search for job postings based on:
 - Location
 - Industry 
@@ -64,11 +71,39 @@ Otherwise, a typical job may looks as follows
 - C, 4 Years
 - Python, 5 Years
 
+## Resume Management
+Users may create, view, and adjust their resume throughout the course of the program. 
 
-## Other
-Input validation
-- wrong inputs
-- not a number 
+We have robust validation to ensure:
+- Duplicate or redundant facts are not asserted into your resume
+- Values are updated properly
+- Only 1 resume per person
+- Only resumes that exist may be updated/viewed
+
+Users also may save their resume:
+- You may specify the file to save to 
+- You may specify which resume to save 
+
+## Qualifications Checking
+Curious users may pit their resume against our database of job postings.
+
+Each qualification property will use its own measurement function to determine if the skill is satified or not
+
+Examples:
+- "Masters" level of education will satisfy any "Masters", "Undergraduate", or "High School" requirement
+- 4 years of Python experience will satify any requirement on Python experience of 4 Years of less
+
+Users will receive a breakdown of how qualified they are for each category along with an overall score.
+
+
+We also have a feature for users to request insight of what skills to focus on and allow judgement based on their importance.
+- We compile your missing qualifications alphabetically
+- We determine how many jobs require the skill
+
+Knowing this, users are able to judge which skills they should priortize and become a better candidate. This was implemented with a Dictionary structure recreated through Prolog.
+
+
+
 
 
    
