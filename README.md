@@ -19,7 +19,7 @@ Features Include:
 - Receive insight on your missing skills and their relevancy in jobs
 
 
-Our program is has many quality of life features such as:
+Our program has quality of life features such as:
 - Input validation (ex. number, wrong input)
 - Input processing (ex. no need to sumbit answers in "" or with period)
 - Skipping inputs (ex. type 'x' to skip the search criteria)
@@ -100,7 +100,9 @@ We also have a feature for users to request insight of what skills to focus on a
 - We compile your missing qualifications alphabetically
 - We determine how many jobs require the skill
 
-Knowing this, users are able to judge which skills they should priortize and become a better candidate. This was implemented with a Dictionary structure recreated through Prolog.
+Knowing this, users are able to judge which skills they should priortize to become a better candidate. 
+
+This was implemented with a Dictionary structure recreated through Prolog.
 
 
 
