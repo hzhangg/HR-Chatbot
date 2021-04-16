@@ -74,7 +74,8 @@ Otherwise, a typical job may looks as follows
 ## Lookup Definitions
 We offer users the utility to lookup definitions of a word. This is useful incase the user is confused about a job posting term and wants to become informed.
 
-We format a user's inputted word into the correct url format. Afterwards, we send the HTTP request to dictionary website for the lookup. 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
+We format a user's inputted word into the correct url format. Afterwards, we send the HTTP request to dictionary website for the lookup.
+- 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/WORD?=APIKEY'
 
 
 ## Resume Management
