@@ -71,6 +71,12 @@ Otherwise, a typical job may looks as follows
 - C, 4 Years
 - Python, 5 Years
 
+## Lookup Definitions
+We offer users the utility to lookup definitions of a word. This is useful incase the user is confused about a job posting term and wants to become informed.
+
+We format a user's inputted word into the correct url format. Afterwards, we send the HTTP request to 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' for the lookup.
+
+
 ## Resume Management
 Users may create, view, and adjust their resume throughout the course of the program. 
 
