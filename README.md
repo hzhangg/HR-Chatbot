@@ -31,7 +31,7 @@ All jobs that satisfy your interests will have their details printed.
 
 In the case none match the criterion
 
-**No Jobs Matching Criteria **
+**No Jobs Matching Criteria**
    
 Otherwise, a typical job may looks as follows
 
