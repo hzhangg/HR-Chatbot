@@ -841,11 +841,11 @@ printExperience([(PL,YOE)|T]) :-
 
 printQualPercent(JobId, LangP, ProgP, EduP, ExpP, TotalP) :-
     write('\n Qualification Summary: Job ID# '),write(JobId),write('\n'),
-    write('\n Languages  '), write(LangP),write('%'),
-    write('\n Programs   '), write(ProgP),write('%'),
-    write('\n Education  '), write(EduP),write('%'),
-    write('\n Experience '), write(ExpP),write('%'),
-    write('\n Overall:   '), write(TotalP),write('%\n').
+    write('\n Languages  '), format('~1f', [LangP]),write('%'),
+    write('\n Programs   '), format('~1f', [ProgP]),write('%'),
+    write('\n Education  '), format('~1f', [EduP]),write('%'),
+    write('\n Experience '), format('~1f', [ExpP]),write('%'),
+    write('\n Overall:   '), format('~1f', [TotalP]),write('%\n').
 
 % Print Dictionary Diff properties
 % - Languages
@@ -968,7 +968,7 @@ prop(004, deadline, 01/31/2022).
 prop(004, position, 'Junior Network Engineer').
 prop(004, salary, 20).
 prop(004, isFulltime, 1).
-prop(004, isRemote, 1).
+prop(004, isRemote, 0).
 
 prop(005, type, job).
 prop(005, location, 'Vancouver').
@@ -978,6 +978,15 @@ prop(005, position, 'Senior Biomedical Engineer').
 prop(005, salary, 40).
 prop(005, isFulltime, 1).
 prop(005, isRemote, 1).
+
+prop(006, type, job).
+prop(006, location, 'Richmond').
+prop(006, industry, 'Bioinfomatics').
+prop(006, deadline, 01/31/2022).
+prop(006, position, 'Project Manager').
+prop(006, salary, 77).
+prop(006, isFulltime, 0).
+prop(006, isRemote, 0).
 
 % Scoring Properties
 % Aside from education, a posting may have multiple of the property
@@ -1011,3 +1020,15 @@ prop(005, language, 'English').
 prop(005, programs, 'Microsoft Excel').
 prop(005, education, 'Masters').
 prop(005, experience, ('Python', '5')).
+
+prop(006, language, 'English').
+prop(006, language, 'French').
+prop(006, language, 'Chinese').
+prop(006, programs, 'Microsoft Excel').
+prop(006, programs, 'Microsoft Word').
+prop(006, programs, 'Jira').
+prop(006, education, 'Masters').
+prop(006, experience, ('Typescript', '5')).
+prop(006, experience, ('Java', '4')).
+prop(006, experience, ('SQL', '3')).
+prop(006, experience, ('CSS', '2')).

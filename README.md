@@ -23,6 +23,7 @@ Our program has quality of life features such as:
 - Input validation (ex. number, wrong input)
 - Input processing (ex. no need to submit answers in "" or with period)
 - Skipping inputs (ex. type 'x' to skip the search criteria)
+- Decimal formatting
 
 
 ## Searching Jobs
@@ -104,7 +105,7 @@ Users will receive a breakdown of how qualified they are for each category along
 
 
 We also have a feature for users to request insight of what skills to focus on and allow judgement based on their importance.
-- We compile your missing qualifications alphabetically
+- We compile your unfulfilled qualifications alphabetically
 - We determine how many jobs require the skill
 
 Knowing this, users are able to judge which skills they should priortize to become a better candidate and aid users in their planning process. Notably, this was implemented with a Dictionary's key insertion structure recreated through Prolog.

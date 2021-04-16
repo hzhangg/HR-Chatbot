@@ -40,7 +40,7 @@ checkDict(Dict, Result) :-
 checkDict(Dict, "None Found") :-
 	not(is_dict(Dict)).
 
-extractHead([H|T], H).
+extractHead([H|_], H).
 
 
 
