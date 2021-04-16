@@ -5,7 +5,7 @@ Wiki Link: https://wiki.ubc.ca/Course:CPSC312-2021/Chatbot
 
 To try our app,
 1. Boot up jobScreener.pl 
-2. Run "ask."
+2. Run "main."
 
 ## Description
 Our HR-Chatbot lets users query against our database of encoded job postings. Users can create their own resume and modify it on the fly for further interactions in the session.
