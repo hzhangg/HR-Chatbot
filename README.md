@@ -21,7 +21,7 @@ Features Include:
 
 Our program has quality of life features such as:
 - Input validation (ex. number, wrong input)
-- Input processing (ex. no need to sumbit answers in "" or with period)
+- Input processing (ex. no need to submit answers in "" or with period)
 - Skipping inputs (ex. type 'x' to skip the search criteria)
 
 
