@@ -1,19 +1,26 @@
 % Start of our Project
 :- dynamic prop/3.
+:- use_module(api).
 
+% Call to run the program
+main() :-
+    printASCII(),
+    write('\n I am a personal assistant bot. \n'),
+    ask().
+
+% Main menu, asks the user what they would like to do
 ask() :-
     flush_output(current_output),
-    write('\n Welcome to the HR Bot'), 
-	write('\n I am a personal assistant bot. \n'),
 	write('\n Select an option: \n
-        1. Look for a Job Posting \n
-        2. Create your Resume \n
-        3. Update your Resume \n
-        4. Show your Resume \n 
-        5. Measure your Resume \n
-        6. Save your Resume to a new file \n
-        7. Quit \n
-        8. Diff Resume \n'),
+        1. Search for a Job Posting \n
+        2. Search for a Definition \n
+        3. Create   Resume \n
+        4. Update   Resume \n
+        5. View     Resume \n 
+        6. Measure  Resume \n
+        7. Evaluate Resume \n
+        8. Save     Resume \n
+        9. Quit \n'),
     readTerminal(Input),
     query(Input).
 
@@ -43,58 +50,69 @@ query(Input) :-
   checkNumber(I2, IsRemote),
   jobFilter(Location, Industry, Position, Salary, IsFullTime, IsRemote).
 
-% Create a users resume
+% Searches for a word definition
 query(Input) :-
   Input = '2', 
-  write('\n What is your name? \n'),
-  readTerminal(Username),
-  checkUserQ2(Username).
+  write('\n What word are you curious about? \n'),
+  readTerminal(Word),
+  define(Word, Definition), % todo !!!
+  nl, write('The definition of '), write(Word), write(' is: '),
+  nl, write(Definition), nl,
+  ask().
 
-% Update a users resume
+% Create a users resume
 query(Input) :-
-  Input = '3',
+  Input = '3', 
   write('\n What is your name? \n'),
   readTerminal(Username),
   checkUserQ3(Username).
 
-% Prints a users resume
-query(Input) :- 
+% Update a users resume
+query(Input) :-
   Input = '4',
   write('\n What is your name? \n'),
   readTerminal(Username),
-  print(Username),
   checkUserQ4(Username).
 
-% Measures a users resume
+% Prints a users resume
 query(Input) :- 
   Input = '5',
   write('\n What is your name? \n'),
   readTerminal(Username),
+  print(Username),
   checkUserQ5(Username).
 
-% Saves a users resume to a new file
+% Measures a users resume
 query(Input) :- 
   Input = '6',
   write('\n What is your name? \n'),
   readTerminal(Username),
   checkUserQ6(Username).
 
-% Quits program
-query(Input) :- 
-  Input = '7',
-  halt(0).
-
 % Diffs users resume against all jobs 
 query(Input) :-
+  Input = '7',
+  write('\n What is your name? \n'),
+  readTerminal(Username),
+  checkUserQ7(Username).
+
+% Saves a users resume to a new file
+query(Input) :- 
   Input = '8',
   write('\n What is your name? \n'),
   readTerminal(Username),
   checkUserQ8(Username).
 
+% Quits program
+query(Input) :- 
+  Input = '9',
+  halt(0).
+
 query(Input) :-
-    not(member(Input, ['1', '2', '3', '4', '5', '6', '7', '8'])),
+    not(member(Input, ['1', '2', '3', '4', '5', '6', '7', '8', '9'])),
     write('\n Invalid Input \n'),
     ask().
+
 
 % ===========
 % Parses user input
@@ -345,15 +363,27 @@ showJob(JobId):-
     nl.
 
 % ---------------------------
-% Query 2: Resume Creation
+% Query 2: HTTP Definitons
 % ---------------------------
-checkUserQ2(Username) :-
+
+define(Word, Definition) :-
+    parseWord(Word, CleanWord),
+    search(CleanWord, Definition).
+
+parseWord(Input, Result) :-
+    atomic_list_concat(Words, ' ', Input),
+    atomic_list_concat(Words, '%20', Result). 
+
+% ---------------------------
+% Query 3: Resume Creation
+% ---------------------------
+checkUserQ3(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     write('\n User Already Exists \n'),
     ask().
 
-checkUserQ2(Username) :-
+checkUserQ3(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     creation(Username).  
@@ -379,16 +409,16 @@ creation(Username) :-
 
 
 % ---------------------------
-% Query 3: Resume Updating
+% Query 4: Resume Updating
 % ---------------------------
 
-checkUserQ3(Username) :-
+checkUserQ4(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     write('\n User Not Found \n'),
     ask().
 
-checkUserQ3(Username) :-
+checkUserQ4(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     update(Username).  
@@ -442,16 +472,16 @@ removeExperiences(Username, PLanguage, [H|T]) :-
     removeExperiences(Username, PLanguage, T).
 
 % ---------------------------
-% Query 4: Resume Showing
+% Query 5: Resume Showing
 % ---------------------------
 
-checkUserQ4(Username) :-
+checkUserQ5(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     write('\n User Not Found \n'),
     ask().
 
-checkUserQ4(Username) :-
+checkUserQ5(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     show(Username). 
@@ -472,16 +502,16 @@ show(Username) :-
   ask().
 
 % ---------------------------
-% Query 5: Resume Measure
+% Query 6: Resume Measure
 % ---------------------------
 
-checkUserQ5(Username) :-
+checkUserQ6(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     write('\n User Not Found \n'),
     ask().
 
-checkUserQ5(Username) :-
+checkUserQ6(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     measure(Username). 
@@ -516,15 +546,15 @@ measureJobList(Username, [J|T]) :-
     measureJobList(Username, T).
 
 % ---------------------------
-% Query 8: Resume Recommendation
+% Query 7: Resume Recommendation
 % ---------------------------
-checkUserQ8(Username) :-
+checkUserQ7(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     write('\n User Not Found \n'),
     ask().
 
-checkUserQ8(Username) :-
+checkUserQ7(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     recommend(Username). 
@@ -557,27 +587,7 @@ recommend(Username) :-
   printPairDict(SDExp),nl,
   write('\n ------------------------------ \n'),
   nl,
-  ask().
-
-checkEmptyDict([]) :-
-    write("\n   <<CATAGORY SATISFIED>>").
-checkEmptyDict(_).
-
-printHeaderDict(Property) :-
-    write('\n '), write(Property),
-    write('\n   #Jobs    Qualification').
-
-printKeyDict([]).
-printKeyDict([(Key, Val)| T]) :- 
-    write('\n   '), write(Val),
-    write('        '), write(Key),
-    printKeyDict(T).
-
-printPairDict([]).
-printPairDict([((PL, Ex), Val)|T]) :-
-    write('\n   '), write(Val),
-    write('        '), write(PL), write(' '), write(Ex), write(' Years'),
-    printPairDict(T).  
+  ask(). 
 
 recommendJobList(_, [], LA, PR, ED, EX, LA, PR, ED, EX).
 recommendJobList(Username, [J|T], ODLang, ODProg, ODEdu, ODExp, NDLang, NDProg, NDEdu, NDExp) :-
@@ -593,16 +603,16 @@ recommendJobList(Username, [J|T], ODLang, ODProg, ODEdu, ODExp, NDLang, NDProg, 
                      NDLang, NDProg, NDEdu, NDExp).
 
 % ---------------------------
-% Query 6: Save Resume to File
+% Query 8: Save Resume to File
 % ---------------------------
 
-checkUserQ6(Username) :-
+checkUserQ8(Username) :-
     findall(U, prop(U, type, applicant), Users),
     not(member(Username, Users)),
     write('\n User Not Found \n'),
     ask().
 
-checkUserQ6(Username) :-
+checkUserQ8(Username) :-
     findall(U, prop(U, type, applicant), Users),
     member(Username, Users),
     saveToFile(Username). 
@@ -837,6 +847,42 @@ printQualPercent(JobId, LangP, ProgP, EduP, ExpP, TotalP) :-
     write('\n Experience '), write(ExpP),write('%'),
     write('\n Overall:   '), write(TotalP),write('%\n').
 
+% Print Dictionary Diff properties
+% - Languages
+% - Programs
+% - Education 
+% - Experience(s) 
+checkEmptyDict([]) :-
+    write("\n   <<CATAGORY SATISFIED>>").
+checkEmptyDict(_).
+
+printHeaderDict(Property) :-
+    write('\n '), write(Property),
+    write('\n   #Jobs    Qualification').
+
+printKeyDict([]).
+printKeyDict([(Key, Val)| T]) :- 
+    write('\n   '), write(Val),
+    write('        '), write(Key),
+    printKeyDict(T).
+
+printPairDict([]).
+printPairDict([((PL, Ex), Val)|T]) :-
+    write('\n   '), write(Val),
+    write('        '), write(PL), write(' '), write(Ex), write(' Years'),
+    printPairDict(T). 
+
+% Print welcome message
+printASCII():-
+    nl, 
+    write('8   8  8                                     ""8""       8   8 8"""8       8""""8               
+8   8  8 eeee e     eeee eeeee eeeeeee eeee    8  eeeee  8   8 8   8       8    8   eeeee eeeee 
+8e  8  8 8    8     8  8 8  88 8  8  8 8       8e 8  88  8eee8 8eee8e      8eeee8ee 8  88   8   
+88  8  8 8eee 8e    8e   8   8 8e 8  8 8eee    88 8   8  88  8 88   8 eeee 88     8 8   8   8e  
+88  8  8 88   88    88   8   8 88 8  8 88      88 8   8  88  8 88   8      88     8 8   8   88  
+88ee8ee8 88ee 88eee 88e8 8eee8 88 8  8 88ee    88 8eee8  88  8 88   8      88eeeee8 8eee8   88  
+                                                                                                '),
+    nl.
 
 % ========================
 % Resume Encoding
