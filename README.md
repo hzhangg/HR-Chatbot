@@ -7,8 +7,7 @@ To try our app,
 1. Boot up jobScreener.pl 
 2. Run "main."
 
-<< Description >> 
---
+## Description
 Our HR-Chatbot lets users query against our database of encoded job postings. Users can create their own resume and modify it on the fly for further interactions in the session.
 
 Features Include:
@@ -19,8 +18,7 @@ Features Include:
 - Receive insight on your missing skills and their relevancy in jobs
 
 
-<< Searching >>
---
+## Searching 
 User's may search for job postings based on:
 - Location
 - Industry 
@@ -31,44 +29,43 @@ User's may search for job postings based on:
 
 All jobs that satisfy your interests will have their details printed.
 
-In the case none match the criterion:
+# In the case none match the criterion:
 
 No Jobs Matching Criteria 
    
-Otherwise, a typical job may looks as follows:
+# Otherwise, a typical job may looks as follows:
 
-Job ID#:    1
+**Job ID#:**    1
 
-Location    Vancouver
+**Location**    Vancouver
 
-Industry    Computer Science
+**Industry**    Computer Science
 
-Position    Software Engineer
+**Position**    Software Engineer
 
-Salary      $40/hr
+**Salary**      $40/hr
 
-Fulltime?   Yes
+**Fulltime?**   Yes
 
-Remote?     Yes
+**Remote?**     Yes
 
-Deadline    1/31/2022
+**Deadline **   1/31/2022
 
-Languages   Qualifications 
+**Languages   Qualifications**
 - English
 
-Programs    Qualifications 
+**Programs    Qualifications**
 - Microsoft Excel
 
-Education   Qualification  
+**Education   Qualification**  
 - Undergraduate
 
-Experience  Qualifications 
+**Experience  Qualifications **
 - C, 4 Years
 - Python, 5 Years
 
 
-<< Other >>
---
+## Other
 Input validation
 - wrong inputs
 - not a number 
