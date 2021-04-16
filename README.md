@@ -32,30 +32,39 @@ User's may search for job postings based on:
 All jobs that satisfy your interests will have their details printed.
 
 In the case none match the criterion:
-   No Jobs Matching Criteria 
+
+No Jobs Matching Criteria 
    
 Otherwise, a typical job may looks as follows:
-   Job ID#:    1
--  Location    Vancouver
--  Industry    Computer Science
--  Position    Software Engineer
--  Salary      $40/hr
--  Fulltime?   Yes
--  Remote?     Yes
--  Deadline    1/31/2022
 
--  Languages   Qualifications 
-               -> English
+Job ID#:    1
 
--  Programs    Qualifications 
-               -> Microsoft Excel
+Location    Vancouver
 
--  Education   Qualification  
-               -> Undergraduate
+Industry    Computer Science
 
--  Experience  Qualifications 
-               -> C, 4 Years
-               -> Python, 5 Years
+Position    Software Engineer
+
+Salary      $40/hr
+
+Fulltime?   Yes
+
+Remote?     Yes
+
+Deadline    1/31/2022
+
+Languages   Qualifications 
+- English
+
+Programs    Qualifications 
+- Microsoft Excel
+
+Education   Qualification  
+- Undergraduate
+
+Experience  Qualifications 
+- C, 4 Years
+- Python, 5 Years
 
 
 << Other >>
@@ -64,5 +73,5 @@ Input validation
 - wrong inputs
 - not a number 
 
-Act
+
    
