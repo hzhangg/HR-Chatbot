@@ -23,17 +23,17 @@ User's may search for job postings based on:
 - Location
 - Industry 
 - Position
-- Salary
-- Fulltime or not
-- Remote or not
+- Minimum expected Salary
+- Whether it is Fulltime
+- Whether it is Remote
 
 All jobs that satisfy your interests will have their details printed.
 
-# In the case none match the criterion
+In the case none match the criterion
 
 **No Jobs Matching Criteria **
    
-# Otherwise, a typical job may looks as follows
+Otherwise, a typical job may looks as follows
 
 **Job ID#:**    1
 
