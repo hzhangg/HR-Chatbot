@@ -112,7 +112,9 @@ Knowing this, users are able to judge which skills they should priortize to beco
 This was implemented with a Dictionary structure recreated through Prolog.
 
 
-
+## References
+We reference this other project as a base.
+- https://github.com/Siunami/Course-Recommender
 
 
    
