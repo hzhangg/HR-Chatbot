@@ -5,11 +5,11 @@
 :- use_module(library(http/json)).
 :- use_module(library(uri)).
 
-api_key('?key=bcf6cda1-420b-4db2-a662-cc922ee0c588').
+api_key('nice try').
 dict_url('https://www.dictionaryapi.com/api/v3/references/collegiate/json/').
 
 
-%https://www.dictionaryapi.com/api/v3/references/collegiate/json/WORD?key=bcf6cda1-420b-4db2-a662-cc922ee0c588
+%https://www.dictionaryapi.com/api/v3/references/collegiate/json/WORD?key
 
 search(Word, Response) :-
     generate_url(Word, RequestUrl),
@@ -23,7 +23,7 @@ generate_url(Word, KeyUrl) :-
 	
 
 % example URL we need to feed to make_request:
-% https://www.dictionaryapi.com/api/v3/references/collegiate/json/WORD?key=bcf6cda1-420b-4db2-a662-cc922ee0c588
+% https://www.dictionaryapi.com/api/v3/references/collegiate/json/WORD?key
 % example of how to format WORD if it has spaces, e.g. "computer science":
 % computer%20science
 make_request(Url, Response) :-
